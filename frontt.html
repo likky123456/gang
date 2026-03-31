@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friends Gang PRO</title>
+
+<style>
+body { margin:0; font-family:Arial; text-align:center; background:#ffc0cb; }
+
+/* LOGIN */
+#login {
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+}
+
+/* MAIN */
+#main { display:none; }
+
+/* BUTTON */
+button {
+  padding:8px;
+  border:none;
+  background:#ff1493;
+  color:white;
+  border-radius:8px;
+  margin:3px;
+  cursor:pointer;
+}
+
+/* GALLERY */
+#gallery {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(120px,1fr));
+  gap:10px;
+  padding:10px;
+}
+
+.card {
+  background:white;
+  border-radius:10px;
+  overflow:hidden;
+  position:relative;
+}
+
+.card img, .card video {
+  width:100%;
+  height:120px;
+  object-fit:cover;
+}
+
+/* LIKE */
+.like {
+  position:absolute;
+  top:5px;
+  right:5px;
+  font-size:14px;
+  cursor:pointer;
+}
+
+/* TEXT */
+.card p {
+  margin:3px;
+  font-size:12px;
+  color:#ff1493;
+}
+
+/* DELETE */
+.deleteBtn {
+  background:red;
+  font-size:10px;
+}
+
+/* VIEWER */
+#viewer {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100vh;
+  background:black;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+}
+
+#viewerContent img,
+#viewerContent video {
+  max-width:90%;
+  max-height:70%;
+}
+
+/* NAV BUTTONS */
+#closeBtn {
+  position:absolute;
+  top:20px;
+  right:20px;
+  background:red;
+  border-radius:50%;
+}
+
+#prevBtn, #nextBtn {
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  background:white;
+  color:black;
+  font-size:20px;
+  border-radius:50%;
+}
+
+#prevBtn { left:10px; }
+#nextBtn { right:10px; }
+
+#viewerCaption {
+  color:white;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <h2>Enter Password</h2>
+  <input type="password" id="pass">
+  <button onclick="login()">Enter</button>
+  <p>Hint: Where did we first become part of each other’s story?</p>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <h2>Our Memories ❤️</h2>
+
+  <div id="gallery"></div>
+
+  <!-- UPLOAD AT BOTTOM -->
+  <p>guys u can add the photos of our memories..</p>
+  <input type="file" id="upload" multiple accept="image/*,video/*">
+</div>
+
+<!-- VIEWER -->
+<div id="viewer">
+  <button id="closeBtn" onclick="closeViewer()">❌</button>
+  <button id="prevBtn" onclick="prevPhoto()">⬅️</button>
+  <button id="nextBtn" onclick="nextPhoto()">➡️</button>
+
+  <div id="viewerContent"></div>
+
+  <p id="viewerCaption"></p>
+
+  <button onclick="editCaption(currentIndex)">Edit ✏️</button>
+  <button onclick="downloadMedia()">💾 Save</button>
+</div>
+
+<!-- MUSIC -->
+<audio id="bgMusic" src="audio/song.mp3" loop></audio>
+
+<script>
+let data = JSON.parse(localStorage.getItem("memories")) || [];
+let currentIndex = 0;
+
+// FIX OLD DATA
+data = data.map(item => ({
+  url: item.url,
+  type: item.type || "image",
+  liked: item.liked || false,
+  likes: item.likes || 0,
+  caption: item.caption || "No caption ❤️"
+}));
+
+function login(){
+  if(document.getElementById("pass").value==="rnsrpm"){
+    document.getElementById("login").style.display="none";
+    document.getElementById("main").style.display="block";
+    document.getElementById("bgMusic").play().catch(()=>{});
+    loadGallery();
+  }
+}
+
+function save(){
+  localStorage.setItem("memories", JSON.stringify(data));
+}
+
+// UPLOAD
+document.getElementById("upload").onchange = function(e){
+  for(let file of e.target.files){
+    let reader = new FileReader();
+    reader.onload = function(){
+      data.push({
+        url: reader.result,
+        type: file.type,
+        liked:false,
+        likes:0,
+        caption:"New memory ❤️"
+      });
+      save();
+      loadGallery();
+    }
+    reader.readAsDataURL(file);
+  }
+};
+
+// VIEW
+function openViewer(type,src,index){
+  currentIndex = index;
+  let viewer=document.getElementById("viewer");
+  let content=document.getElementById("viewerContent");
+  let caption=document.getElementById("viewerCaption");
+
+  viewer.style.display="flex";
+
+  let item = data[index];
+
+  if(type.includes("video")){
+    content.innerHTML=`<video src="${src}" controls autoplay></video>`;
+  } else {
+    content.innerHTML=`<img src="${src}">`;
+  }
+
+  caption.innerText = item.caption;
+}
+
+function closeViewer(){
+  document.getElementById("viewer").style.display="none";
+}
+
+function nextPhoto(){
+  if(currentIndex < data.length - 1){
+    currentIndex++;
+    let item = data[currentIndex];
+    openViewer(item.type,item.url,currentIndex);
+  }
+}
+
+function prevPhoto(){
+  if(currentIndex > 0){
+    currentIndex--;
+    let item = data[currentIndex];
+    openViewer(item.type,item.url,currentIndex);
+  }
+}
+
+// EDIT
+function editCaption(index){
+  let newCaption = prompt("Edit caption:", data[index].caption);
+  if(newCaption){
+    data[index].caption = newCaption;
+    save();
+    loadGallery();
+    document.getElementById("viewerCaption").innerText = newCaption;
+  }
+}
+
+// DELETE
+function deletePhoto(index){
+  if(confirm("Delete this memory?")){
+    data.splice(index,1);
+    save();
+    loadGallery();
+  }
+}
+
+// DOWNLOAD
+function downloadMedia(){
+  let item = data[currentIndex];
+  let a = document.createElement("a");
+  a.href = item.url;
+  a.download = "memory";
+  a.click();
+}
+
+// LOAD
+function loadGallery(){
+  let g=document.getElementById("gallery");
+  g.innerHTML="";
+
+  if(data.length === 0){
+    g.innerHTML = "<p>No memories yet 😢 Upload something!</p>";
+    return;
+  }
+
+  data.forEach((item,index)=>{
+    let card=document.createElement("div");
+    card.className="card";
+
+    card.innerHTML=`
+      ${item.type.includes("video")
+        ? `<video src="${item.url}"></video>`
+        : `<img src="${item.url}">`}
+      <div class="like">${item.liked?"❤️":"🤍"} ${item.likes}</div>
+      <p>${item.caption}</p>
+      <button class="deleteBtn" onclick="event.stopPropagation(); deletePhoto(${index})">Delete 🗑</button>
+    `;
+
+    let likeBtn=card.querySelector(".like");
+
+    likeBtn.onclick=(e)=>{
+      e.stopPropagation();
+      item.liked=!item.liked;
+      item.likes += item.liked ? 1 : -1;
+      if(item.likes < 0) item.likes = 0;
+      save();
+      loadGallery();
+    };
+
+    card.onclick=()=>openViewer(item.type,item.url,index);
+    g.appendChild(card);
+  });
+}
+</script>
+
+</body>
+</html>  

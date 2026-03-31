@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Gang Hub</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <h1 id="typedHeader"></h1>
+  <button onclick="scrollToGang()">Meet the Gang</button>
+</header>
+
+<!-- Gang Members Section -->
+<section id="gang">
+  <h2>Our Gang Members</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="front"><img src="images/member1.jpg" alt="Member 1"></div>
+      <div class="back">
+        <h3>Alex</h3>
+        <p>Nickname: The Joker</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="front"><img src="images/member2.jpg" alt="Member 2"></div>
+      <div class="back">
+        <h3>Sam</h3>
+        <p>Nickname: The Brain</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="front"><img src="images/member3.jpg" alt="Member 3"></div>
+      <div class="back">
+        <h3>Ria</h3>
+        <p>Nickname: The Artist</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery Section -->
+<section id="gallery">
+  <h2>Gallery</h2>
+  <div class="slider">
+    <img src="images/photo1.jpg" class="slide active" alt="Photo 1">
+    <img src="images/photo2.jpg" class="slide" alt="Photo 2">
+    <img src="images/photo3.jpg" class="slide" alt="Photo 3">
+  </div>
+</section>
+
+<!-- Chat Wall -->
+<section id="chat">
+  <h2>Gang Wall</h2>
+  <div class="chat-input">
+    <input type="text" id="messageInput" placeholder="Write something fun...">
+    <button onclick="postMessage()">Post</button>
+  </div>
+  <div id="messages"></div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p>Made with ❤️ by Our Gang</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
